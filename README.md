@@ -1,5 +1,9 @@
 ## 🚀 Instruction to Drag-and-drop Tweet App
 
+**Preview**
+![Alt Text](https://github.com/img31415/tweet/blob/master/TweetApp.PNG)
+
+
 1.  **Go to the directory of tweet/app**
 ```bash
 C:\Users\user\tweet\app
@@ -20,4 +24,4 @@ http://localhost:8000/
 
 
 
-![Alt Text](https://github.com/img31415/tweet/blob/master/TweetApp.PNG)
+
