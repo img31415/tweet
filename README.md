@@ -1,4 +1,4 @@
-## 🚀 Instruction to Tweet App
+## 🚀 Instruction to Drag-and-drop Tweet App
 
 1.  **Go to the directory of tweet/app**
 ```bash
@@ -17,3 +17,4 @@ gatsby develop
 
 4. **It is now running at localhost:8000**
 http://localhost:8000/
+
