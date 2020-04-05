@@ -1,4 +1,8 @@
 module.exports = {
+  proxy:{
+    prefix:'/api',
+    url: 'http://dev-test.com'
+  },
   siteMetadata: {
     title: `M's Tweet App`,
     description: `This is M's Tweet App`,
