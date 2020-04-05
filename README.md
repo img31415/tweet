@@ -18,3 +18,5 @@ gatsby develop
 4. **It is now running at localhost:8000**
 http://localhost:8000/
 
+
+![Alt Text](https://github.com/img31415/tweet/blob/master/TweetApp.PNG)
