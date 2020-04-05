@@ -1,9 +1,9 @@
 
 ## 🚀 Instruction to Tweet App
 
-1.  **Go to the directory of tweet-1/app**
+1.  **Go to the directory of tweet/app**
 ```bash
-C:\Users\user\tweet-1\app
+C:\Users\user\tweet\app
 ```
 
 2. **Install the dependency packages**
