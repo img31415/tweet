@@ -2,6 +2,8 @@ import React from "react"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import axios from "axios"
+import { DndProvider } from "react-dnd"
+import Backend from "react-dnd-html5-backend"
 import { data } from "../components/test.js"
 // const app = express()
 // const cors = require('cors')
@@ -30,7 +32,7 @@ const styles = {
     overflow: "scroll",
   },
   row: {
-    padding: '5px',
+    padding: "5px",
     fontSize: "12px",
     width: "100%",
     height: "70px",
@@ -49,7 +51,7 @@ const styles = {
     height: "100%",
   },
   profilePic: {
-    padding: '5px',
+    padding: "5px",
     width: "20%",
     float: "left",
     height: "100%",
@@ -66,7 +68,7 @@ const styles = {
     height: "30%",
   },
   bottomRow: {
-    marginTop: '5px',
+    marginTop: "5px",
     textOverflow: "ellipsis",
     overflow: "hidden",
     float: "left",
@@ -126,7 +128,9 @@ class IndexPage extends React.Component {
     console.log("data", data)
   }
 
-  search() {}
+  search() {
+    this.getTweetList()
+  }
 
   render() {
     const onChangeText = e => {
@@ -134,12 +138,34 @@ class IndexPage extends React.Component {
       this.setState({ search: e.target.value })
     }
 
+    const dragStart = e => {
+      e.dataTransfer.setData("id", e.target.id)
+    }
+
+    const allowDrop = e => {
+      e.preventDefault()
+    }
+
+    const drop = e => {
+      e.preventDefault()
+      console.log("[^-^] DROP DATA", e)
+
+      let data = e.dataTransfer.getData("id")
+      console.log("[^-^] DROPDATA", data)
+    }
+
     const tweetList = tweetList =>
       tweetList.map(tw => {
         return (
-          <div style={styles.row}>
+          // <Card tw={tw} />
+          <div
+            style={styles.row}
+            ondragstart={e => dragStart(e)}
+            draggable="true"
+            id={tw.id}
+          >
             <div style={styles.profilePic}>
-              <img src={tw.user.profileImageUrlHttps}/>
+              <img src={tw.user.profileImageUrlHttps} />
             </div>
             <div style={styles.leftRow}>
               <div style={styles.topRow}>
@@ -168,7 +194,16 @@ class IndexPage extends React.Component {
                 Search
               </button>
             </div>
-            <div style={styles.listWrapper}>
+            <div
+              style={styles.listWrapper}
+              class="droptarget"
+              onDrop={e => {
+                drop(e)
+              }}
+              onDragOver={e => {
+                allowDrop(e)
+              }}
+            >
               {tweetList(this.state.tweetList)}
             </div>
           </div>
@@ -176,7 +211,16 @@ class IndexPage extends React.Component {
             <div style={styles.titleWrapper}>
               <div style={styles.title}>Saved Tweets</div>
             </div>
-            <div style={styles.listWrapper}>
+            <div
+              style={styles.listWrapper}
+              class="droptarget"
+              onDrop={e => {
+                drop(e)
+              }}
+              onDragOver={e => {
+                allowDrop(e)
+              }}
+            >
               {tweetList(this.state.savedTweetList)}
             </div>
             <div style={styles.savedContainer}></div>
