@@ -29,20 +29,20 @@ const styles = {
     width: "100%",
     marginBottom: "20px",
   },
-  title:{
-    width: '44%',
-    float: 'left'
+  title: {
+    width: "44%",
+    float: "left",
   },
-  count:{
-    paddingBottom: '28px',
-    width: '35px',
-    height: '25px',
-    fontSize: '15px',
-    textAlign:'center',
-    borderRadius : '10px',
-    backgroundColor: 'rebeccapurple',
-    color: 'white',
-    float: 'left'
+  count: {
+    paddingBottom: "28px",
+    width: "35px",
+    height: "25px",
+    fontSize: "15px",
+    textAlign: "center",
+    borderRadius: "10px",
+    backgroundColor: "rebeccapurple",
+    color: "white",
+    float: "left",
   },
   listWrapper: {
     paddingRight: "10px",
@@ -134,19 +134,27 @@ class IndexPage extends React.Component {
     let savedItem = localStorage.getItem("savedTweetList")
     let savedTweetList = savedItem ? JSON.parse(savedItem) : []
     this.setState({ tweetList: data, savedTweetList: savedTweetList })
+    this.getTweetList()
+    //if we can get the tweet list from the server, that data will be overwrited.
   }
 
-  getTweetList() {
+  getTweetList = async () => {
     const keyword = this.state.keyword
-    axios.defaults.headers.post["Content-Type"] =
-      "application/x-www-form-urlencoded"
-    const data = axios
-      .get(
-        `http://tweetsaver.herokuapp.com/?q=${keyword}&callback=yourJSONPCallbackFn&count=10`
-      )
-      .then(response => {
-        return response.json()
+
+    const data = await fetch(
+      `http://tweetsaver.herokuapp.com/?q=${keyword}&callback=yourJSONPCallbackFn&count=10`,
+      {
+        mehtod: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    if (data.tweets) {
+      this.setState({
+        tweetList: data.tweets,
       })
+    }
   }
 
   search() {
@@ -296,7 +304,10 @@ class IndexPage extends React.Component {
           </div>
           <div style={styles.containerRight}>
             <div style={styles.titleWrapper}>
-            <div style={styles.title}><h3>Saved Tweets</h3></div> <div style={styles.count}>{this.state.savedTweetList.length}</div>
+              <div style={styles.title}>
+                <h3>Saved Tweets</h3>
+              </div>{" "}
+              <div style={styles.count}>{this.state.savedTweetList.length}</div>
             </div>
             <div style={styles.listWrapper}>
               {tweetList(this.state.savedTweetList, 1)}

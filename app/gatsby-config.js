@@ -1,8 +1,18 @@
+// const createProxyMiddleware =require('http-proxy-middleware')
+
 module.exports = {
-  proxy:{
-    prefix:'/api',
-    url: 'http://dev-test.com'
-  },
+  // developMiddleware: app => {
+  //   app.use(
+  //     "http://localhost:8000/api",
+  //     createProxyMiddleware({
+  //       target: "http://tweetsaver.herokuapp.com",
+  //       changeOrigin: true,
+  //       pathRewrite:{
+  //         "http://localhost:8000/api": ""
+  //       }
+  //     })
+  //   )
+  // },
   siteMetadata: {
     title: `M's Tweet App`,
     description: `This is M's Tweet App`,
