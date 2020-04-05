@@ -2,8 +2,7 @@ import React from "react"
 import Layout from "../components/layout"
 import SEO from "../components/seo"
 import axios from "axios"
-import { DndProvider } from "react-dnd"
-import Backend from "react-dnd-html5-backend"
+import { TiDelete, TiArrowRightOutline } from "react-icons/ti"
 import { data } from "../components/test.js"
 // const app = express()
 // const cors = require('cors')
@@ -18,18 +17,39 @@ const styles = {
     float: "left",
     width: "45%",
     height: "100%",
-    marginRight: "10%",
+  },
+  containerCenter: {
+    width: "10%",
+    textAlign: "center",
+    height: "100%",
+    float: "left",
   },
   titleWrapper: {
     height: "30px",
     width: "100%",
     marginBottom: "20px",
   },
+  title:{
+    width: '44%',
+    float: 'left'
+  },
+  count:{
+    paddingBottom: '28px',
+    width: '35px',
+    height: '25px',
+    fontSize: '15px',
+    textAlign:'center',
+    borderRadius : '10px',
+    backgroundColor: 'rebeccapurple',
+    color: 'white',
+    float: 'left'
+  },
   listWrapper: {
     paddingRight: "10px",
     width: "100%",
     height: "100%",
     overflow: "scroll",
+    overflowX: "hidden",
   },
   row: {
     padding: "5px",
@@ -78,7 +98,7 @@ const styles = {
     height: "70%",
   },
   username: {
-    width: "30%",
+    width: "25%",
     overflow: "hidden",
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -87,7 +107,7 @@ const styles = {
   },
   screenname: {
     color: "gray",
-    width: "70%",
+    width: "60%",
     float: "left",
   },
   text: {},
@@ -106,11 +126,14 @@ class IndexPage extends React.Component {
     savedTweetList: [],
     keyword: "obama",
     isLoading: false,
+    draggedover: false,
   }
 
   componentDidMount() {
     let keyword = this.state.keyword
-    this.setState({ tweetList: data })
+    let savedItem = localStorage.getItem("savedTweetList")
+    let savedTweetList = savedItem ? JSON.parse(savedItem) : []
+    this.setState({ tweetList: data, savedTweetList: savedTweetList })
   }
 
   getTweetList() {
@@ -122,10 +145,8 @@ class IndexPage extends React.Component {
         `http://tweetsaver.herokuapp.com/?q=${keyword}&callback=yourJSONPCallbackFn&count=10`
       )
       .then(response => {
-        console.log(data)
         return response.json()
       })
-    console.log("data", data)
   }
 
   search() {
@@ -134,7 +155,6 @@ class IndexPage extends React.Component {
 
   render() {
     const onChangeText = e => {
-      console.log(e)
       this.setState({ search: e.target.value })
     }
 
@@ -144,25 +164,67 @@ class IndexPage extends React.Component {
 
     const allowDrop = e => {
       e.preventDefault()
+      this.setState({
+        draggedover: true,
+      })
     }
 
-    const drop = e => {
+    const saveToLocal = savedList => {
+      if (typeof Storage !== "undefined") {
+        // if the storage exists, save it to storage
+        localStorage.setItem("savedTweetList", JSON.stringify(savedList))
+      } else {
+        alert("Sorry! No Web Storage support..")
+      }
+    }
+
+    const drop = async e => {
       e.preventDefault()
-      console.log("[^-^] DROP DATA", e)
-
-      let data = e.dataTransfer.getData("id")
-      console.log("[^-^] DROPDATA", data)
+      this.setState({
+        draggedover: false,
+      })
+      const id = e.dataTransfer.getData("id")
+      if (e.target.className === "droptarget2") {
+        //delete from tweetList and move to savelist and save the array in the local storage.
+        const tweetList = this.state.tweetList
+        const data = tweetList.find(tweet => {
+          return parseInt(tweet.id) == id ? tweet : null
+        })
+        if (data) {
+          const savedTemp = this.state.savedTweetList
+          if (savedTemp.filter(tweet => tweet.id == id).length < 1) {
+            savedTemp.unshift(data)
+            //save to local storage
+            saveToLocal(savedTemp)
+            this.setState({
+              savedTweetList: savedTemp,
+            })
+          } else {
+            alert("this tweet is already saved")
+          }
+        } else {
+          alert("Tweet doesn't exist")
+          return
+        }
+      }
     }
 
-    const tweetList = tweetList =>
+    const unsaveTweet = async id => {
+      let temp = this.state.savedTweetList
+      temp = temp.filter(tweet => tweet.id !== id)
+      this.setState({ savedTweetList: temp })
+      saveToLocal(temp)
+    }
+
+    const tweetList = (tweetList, type) =>
       tweetList.map(tw => {
         return (
-          // <Card tw={tw} />
           <div
             style={styles.row}
-            ondragstart={e => dragStart(e)}
+            onDragStart={e => dragStart(e)}
             draggable="true"
             id={tw.id}
+            key={tw.id}
           >
             <div style={styles.profilePic}>
               <img src={tw.user.profileImageUrlHttps} />
@@ -171,6 +233,21 @@ class IndexPage extends React.Component {
               <div style={styles.topRow}>
                 <div style={styles.username}>{tw.user.name}</div>{" "}
                 <div style={styles.screenname}>@{tw.user.screenName}</div>{" "}
+                {type == 1 ? (
+                  <div>
+                    <TiDelete
+                      style={{
+                        width: "15%",
+                        float: "left",
+                        height: "25px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        unsaveTweet(tw.id)
+                      }}
+                    />
+                  </div>
+                ) : null}
               </div>
               <div style={styles.bottomRow}>{tw.text}</div>
             </div>
@@ -187,7 +264,7 @@ class IndexPage extends React.Component {
               <input
                 style={styles.input}
                 value={this.state.search}
-                placeholder={"type something to search"}
+                placeholder={"Type something to search"}
                 onChange={x => onChangeText(x)}
               />
               <button style={styles.button} onClick={() => this.getTweetList()}>
@@ -196,7 +273,7 @@ class IndexPage extends React.Component {
             </div>
             <div
               style={styles.listWrapper}
-              class="droptarget"
+              className="droptarget1"
               onDrop={e => {
                 drop(e)
               }}
@@ -204,24 +281,47 @@ class IndexPage extends React.Component {
                 allowDrop(e)
               }}
             >
-              {tweetList(this.state.tweetList)}
+              {tweetList(this.state.tweetList, 0)}
             </div>
+          </div>
+          <div style={styles.containerCenter}>
+            <TiArrowRightOutline
+              style={{
+                color: "#B19CD9",
+                marginTop: "50%",
+                width: "60%",
+                height: "60%",
+              }}
+            />
           </div>
           <div style={styles.containerRight}>
             <div style={styles.titleWrapper}>
-              <div style={styles.title}>Saved Tweets</div>
+            <div style={styles.title}><h3>Saved Tweets</h3></div> <div style={styles.count}>{this.state.savedTweetList.length}</div>
             </div>
-            <div
-              style={styles.listWrapper}
-              class="droptarget"
-              onDrop={e => {
-                drop(e)
-              }}
-              onDragOver={e => {
-                allowDrop(e)
-              }}
-            >
-              {tweetList(this.state.savedTweetList)}
+            <div style={styles.listWrapper}>
+              {tweetList(this.state.savedTweetList, 1)}
+              {this.state.draggedover ? (
+                <div
+                  className="droptarget2"
+                  onDrop={e => {
+                    drop(e)
+                  }}
+                  onDragOver={e => {
+                    allowDrop(e)
+                  }}
+                  style={{
+                    width: "40%",
+                    height: "420px",
+                    float: "left",
+                    position: "absolute",
+                    opacity: "0.3",
+                    top: "180px",
+                    textAlign: "center",
+                    padding: "auto",
+                    fontWeight: "800",
+                  }}
+                ></div>
+              ) : null}
             </div>
             <div style={styles.savedContainer}></div>
           </div>
